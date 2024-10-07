@@ -4,14 +4,12 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { useToast } from 'primevue/usetoast';
 
 defineProps({
     canLogin: Boolean,
     errors: Object,
 });
 
-const toast = useToast();
 const form = useForm({
     email: null,
     password: null,

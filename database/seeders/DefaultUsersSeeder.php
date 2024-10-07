@@ -44,14 +44,14 @@ class DefaultUsersSeeder extends Seeder
                 'name' => 'Team B Admin',
                 'email' => 'teamb.admin@email.com',
                 'password' =>  Hash::make('password'),
-                'team_id' => 1,
+                'team_id' => 2,
                 'user_type' => 2
             ],
             [
                 'name' => 'Team B Member',
                 'email' => 'teamb.member@email.com',
                 'password' =>  Hash::make('password'),
-                'team_id' => 1,
+                'team_id' => 2,
                 'user_type' => 3
             ]
         ];
