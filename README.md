@@ -2,39 +2,38 @@
 After cloning the app, move to project root directory and follow these steps to run the app locally.
 
 ### Installing php dependencies
-\```bash  
+```bash  
 composer install
-\```
 
 or
 
-\```bash  
+```bash  
 composer install --ignore-platform-reqs
-\```
+```
 
 ### Installing node dependencies
-\```bash  
+```bash  
 npm install
-\```
+```
 
 ### Migrate database
-\```bash  
+```bash  
 php artisan migrate
-\```
+```
 
 ### Run seeders
 load default system values
+```
 
-\```bash  
+```bash  
 php artisan db:seed
-\```
+```
 
 ### Run laravel server
-\```bash  
+```bash  
 php artisan serve
-\```
+```
 
 ### Open another terminal and run
-\```bash  
+```bash  
 npm run dev
-\```
