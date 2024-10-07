@@ -4,7 +4,7 @@ After cloning the app, move to project root directory and follow these steps to 
 ### Installing php dependencies
 ```bash  
 composer install
-
+```
 or
 
 ```bash  
@@ -23,8 +23,6 @@ php artisan migrate
 
 ### Run seeders
 load default system values
-```
-
 ```bash  
 php artisan db:seed
 ```
