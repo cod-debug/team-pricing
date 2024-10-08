@@ -77,6 +77,7 @@ class TeamPricingController extends Controller
 
                 $exist = TeamPricingModel::where('manufacturer', $manufacturer)
                 ->where('model_number', $model_number)
+                ->where('team_id', $team_id)
                 ->first();
 
                 if($exist){

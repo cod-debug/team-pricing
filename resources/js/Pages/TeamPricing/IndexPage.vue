@@ -15,6 +15,13 @@ defineProps({
     teamPricing: Object,
 });
 
+function formatNumber(number, decimals = 2){
+    return number.toLocaleString(undefined, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals}
+    )
+}
+
 </script>
 
 <template>
@@ -35,15 +42,30 @@ defineProps({
                             <Link :href="route('team_pricing_upload')"><PrimaryButton>Upload</PrimaryButton></Link>
                         </div>
                     </div>
-                    <div class="p-4">
+                    <div class="p-4" v-if="teamPricing.data?.length > 0">
                         <DataTable :value="teamPricing.data" tableStyle="min-width: 50rem">
                             <Column field="part_type" header="Part Type"></Column>
                             <Column field="manufacturer" header="Manufacturer"></Column>
                             <Column field="model_number" header="Model Number"></Column>
-                            <Column field="list_price" header="List Price"></Column>
-                            <Column field="multiplier" header="Multiplier"></Column>
-                            <Column field="static_price" header="Static Price"></Column>
+                            <Column field="list_price" header="List Price" class="text-right"></Column>
+                            <Column header="Multiplier">
+                                <template #body="slotProps">
+                                    <p class="text-right">{{ slotProps.data.multiplier || '' }}</p>
+                                </template></Column>
+                            <Column header="Static Price">
+                                <template #body="slotProps">
+                                    <p class="text-right">{{ slotProps.data.static_price || '' }}</p>
+                                </template>
+                            </Column>
+                            <Column header="Team Price">
+                                <template #body="slotProps">
+                                    <div class="text-right">{{ formatNumber(slotProps.data.multiplier ? slotProps.data.multiplier * slotProps.data.list_price : slotProps.data.static_price)}}</div>
+                                </template>
+                            </Column>
                         </DataTable>
+                    </div>
+                    <div class="p-6" v-else>
+                        No data found
                     </div>
                 </div>
             </div>
