@@ -1,207 +1,164 @@
 
 <template>
-    <div class="card">
-        <DataTable v-model:filters="filters" :value="customers" paginator showGridlines :rows="10" dataKey="id"
-                filterDisplay="menu" :loading="loading" :globalFilterFields="['name', 'country.name', 'representative.name', 'balance', 'status']">
-            <template #header>
-                <div class="flex justify-between">
-                    <button type="button" label="Clear" outlined @click="clearFilter()">
-                        <i class="pi pi-filter-slash"></i> Clear Search
-                    </button>
-                    <IconField>
-                        <InputIcon>
-                            <i class="pi pi-search" />
-                        </InputIcon>
-                        <input v-model="filters['global'].value" placeholder="Keyword Search" />
-                    </IconField>
-                </div>
-            </template>
-            <template #empty> No customers found. </template>
-            <template #loading> Loading customers data. Please wait. </template>
-            <Column field="name" header="Name" style="min-width: 12rem">
-                <template #body="{ data }">
-                    {{ data.name }}
-                </template>
-                <template #filter="{ filterModel }">
-                    <input v-model="filterModel.value" type="text" placeholder="Search by name" />
-                </template>
-            </Column>
-            <Column header="Country" filterField="country.name" style="min-width: 12rem">
-                <template #body="{ data }">
-                    <div class="flex items-center gap-2">
-                        <img alt="flag" src="https://primefaces.org/cdn/primevue/images/flag/flag_placeholder.png" :class="`flag flag-${data.country.code}`" style="width: 24px" />
-                        <span>{{ data.country.name }}</span>
+    <Head title="Team Pricing" />
+
+    <AuthenticatedLayout>
+        <template #header>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">System-wide parts</h2>
+        </template>
+
+        <div class="py-12">
+            <div class="max-w-8xl mx-auto sm:px-6 lg:px-8">
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <div class="p-6 text-gray-900 font-bold text-lg">List of system-wide parts</div>
+                        <div class="p-6 flex gap-2" v-if="allowUpload">
+                            <SecondaryButton @click="exportCSV($event)">
+                                <i class="pi pi-download"></i>
+                                <span class="ml-2">Download</span>
+                            </SecondaryButton>
+                            <Link :href="route('team_pricing_upload')">
+                                <PrimaryButton>
+                                    <i class="pi pi-upload"></i>
+                                    <span class="ml-2">Upload</span>
+                                </PrimaryButton>
+                            </Link>
+                        </div>
                     </div>
-                </template>
-                <template #filter="{ filterModel }">
-                    <input v-model="filterModel.value" type="text" placeholder="Search by country" />
-                </template>
-                <template #filterclear="{ filterCallback }">
-                    <button type="button" icon="pi pi-times" @click="filterCallback()" severity="secondary"></button>
-                </template>
-                <template #filterapply="{ filterCallback }">
-                    <button type="button" icon="pi pi-check" @click="filterCallback()" severity="success"></button>
-                </template>
-                <template #filterfooter>
-                    <div class="px-4 pt-0 pb-4 text-center">Customized Buttons</div>
-                </template>
-            </Column>
-            <Column header="Agent" filterField="representative" :showFilterMatchModes="false" :filterMenuStyle="{ width: '14rem' }" style="min-width: 14rem">
-                <template #body="{ data }">
-                    <div class="flex items-center gap-2">
-                        <img :alt="data.representative.name" :src="`https://primefaces.org/cdn/primevue/images/avatar/${data.representative.image}`" style="width: 32px" />
-                        <span>{{ data.representative.name }}</span>
-                    </div>
-                </template>
-                <template #filter="{ filterModel }">
-                    <MultiSelect v-model="filterModel.value" :options="representatives" optionLabel="name" placeholder="Any">
-                        <template #option="slotProps">
-                            <div class="flex items-center gap-2">
-                                <img :alt="slotProps.option.name" :src="`https://primefaces.org/cdn/primevue/images/avatar/${slotProps.option.image}`" style="width: 32px" />
-                                <span>{{ slotProps.option.name }}</span>
+                    <DataTable v-model:filters="filters" 
+                            :value="teamPricing" 
+                            paginator 
+                            showGridlines 
+                            :rows="10" 
+                            dataKey="id"
+                            ref="dt"
+                            filterDisplay="menu" 
+                            :globalFilterFields="['part_type', 'manufacturer', 'model_number', 'list_price', 'multipler', 'static_price', 'team_price']"
+                    >
+                        <template #header>
+                            <div class="flex justify-between">
+                                <button type="button" label="Clear" outlined @click="clearFilter()">
+                                    <i class="pi pi-filter-slash"></i> Clear Search
+                                </button>
+                                <IconField>
+                                    <InputIcon class="mr-2">
+                                        <i class="pi pi-search" />
+                                    </InputIcon>
+                                    <input v-model="filters['global'].value" placeholder="Keyword Search" />
+                                </IconField>
                             </div>
                         </template>
-                    </MultiSelect>
-                </template>
-            </Column>
-            <Column header="Date" filterField="date" dataType="date" style="min-width: 10rem">
-                <template #body="{ data }">
-                    {{ formatDate(data.date) }}
-                </template>
-                <template #filter="{ filterModel }">
-                    <DatePicker v-model="filterModel.value" dateFormat="mm/dd/yy" placeholder="mm/dd/yyyy" />
-                </template>
-            </Column>
-            <Column header="Balance" filterField="balance" dataType="numeric" style="min-width: 10rem">
-                <template #body="{ data }">
-                    {{ formatCurrency(data.balance) }}
-                </template>
-                <template #filter="{ filterModel }">
-                    <InputNumber v-model="filterModel.value" mode="currency" currency="USD" locale="en-US" />
-                </template>
-            </Column>
-            <Column header="Status" field="status" :filterMenuStyle="{ width: '14rem' }" style="min-width: 12rem">
-                <template #body="{ data }">
-                    <Tag :value="data.status" :severity="getSeverity(data.status)" />
-                </template>
-                <template #filter="{ filterModel }">
-                    <Select v-model="filterModel.value" :options="statuses" placeholder="Select One" showClear>
-                        <template #option="slotProps">
-                            <Tag :value="slotProps.option" :severity="getSeverity(slotProps.option)" />
-                        </template>
-                    </Select>
-                </template>
-            </Column>
-            <Column field="activity" header="Activity" :showFilterMatchModes="false" style="min-width: 12rem">
-                <template #body="{ data }">
-                    <ProgressBar :value="data.activity" :showValue="false" style="height: 6px"></ProgressBar>
-                </template>
-                <template #filter="{ filterModel }">
-                    <Slider v-model="filterModel.value" range class="m-4"></Slider>
-                    <div class="flex items-center justify-between px-2">
-                        <span>{{ filterModel.value ? filterModel.value[0] : 0 }}</span>
-                        <span>{{ filterModel.value ? filterModel.value[1] : 100 }}</span>
-                    </div>
-                </template>
-            </Column>
-            <Column field="verified" header="Verified" dataType="boolean" bodyClass="text-center" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <i class="pi" :class="{ 'pi-check-circle text-green-500 ': data.verified, 'pi-times-circle text-red-500': !data.verified }"></i>
-                </template>
-                <template #filter="{ filterModel }">
-                    <label for="verified-filter" class="font-bold"> Verified </label>
-                    <Checkbox v-model="filterModel.value" :indeterminate="filterModel.value === null" binary inputId="verified-filter" />
-                </template>
-            </Column>
-        </DataTable>
-    </div>
+                        <template #empty> No system-wide parts found. </template>
+                        <template #loading> Loading system-wide parts data. Please wait. </template>
+                        <Column field="part_type" header="Part Type" style="min-width: 12rem">
+                            <template #body="{ data }">
+                                {{ data.part_type }}
+                            </template>
+                            <template #filter="{ filterModel }">
+                                <input v-model="filterModel.value" type="text" placeholder="Search by part type" />
+                            </template>
+                        </Column>
+                        <Column field="manufacturer" header="Manufacturer" style="min-width: 12rem">
+                            <template #body="{ data }">
+                                {{ data.manufacturer }}
+                            </template>
+                            <template #filter="{ filterModel }">
+                                <input v-model="filterModel.value" type="text" placeholder="Search by manufacturer" />
+                            </template>
+                        </Column>
+                        <Column field="model_number" header="Model Number" style="min-width: 12rem">
+                            <template #body="{ data }">
+                                {{ data.model_number }}
+                            </template>
+                            <template #filter="{ filterModel }">
+                                <input v-model="filterModel.value" type="text" placeholder="Search by model number" />
+                            </template>
+                        </Column>
+                        <Column field="list_price" header="List Price" style="min-width: 12rem">
+                            <template #body="{ data }">
+                                <div class="text-right">{{ data.list_price }}</div>
+                            </template>
+                            <template #filter="{ filterModel }">
+                                <input v-model="filterModel.value" type="text" placeholder="Search by list price" />
+                            </template>
+                        </Column>
+                        <Column field="multiplier" header="Multiplier" style="min-width: 12rem">
+                            <template #body="{ data }">
+                                <div class="text-right">{{ data.multiplier ? data.multiplier : '' }}</div>
+                            </template>
+                            <template #filter="{ filterModel }">
+                                <input v-model="filterModel.value" type="text" placeholder="Search by list multiplier" />
+                            </template>
+                        </Column>
+                        <Column field="static_price" header="Static Price" style="min-width: 12rem">
+                            <template #body="{ data }">
+                                <div class="text-right">{{ data.static_price > 0 ? data.static_price : ''  }}</div>
+                            </template>
+                            <template #filter="{ filterModel }">
+                                <input v-model="filterModel.value" type="text" placeholder="Search by list static price" />
+                            </template>
+                        </Column>
+                        <Column field="team_price" header="Team Price" style="min-width: 12rem">
+                            <template #body="{ data }">
+                                <div class="text-right">{{ data.team_price > 0 ? formatNumber(data.team_price, 2, 10) : ''  }}</div>
+                            </template>
+                            <template #filter="{ filterModel }">
+                                <input v-model="filterModel.value" type="text" placeholder="Search by list static price" />
+                            </template>
+                        </Column>
+                    </DataTable>
+                </div>
+            </div>
+        </div>
+    </AuthenticatedLayout>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { CustomerService } from '@/Service/CustomerService.js';
+import { ref } from 'vue';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
-import Checkbox from '@/Components/Checkbox.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { Link } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 
-const customers = ref();
-const filters = ref();
-const representatives = ref([
-    { name: 'Amy Elsner', image: 'amyelsner.png' },
-    { name: 'Anna Fali', image: 'annafali.png' },
-    { name: 'Asiya Javayant', image: 'asiyajavayant.png' },
-    { name: 'Bernardo Dominic', image: 'bernardodominic.png' },
-    { name: 'Elwin Sharvill', image: 'elwinsharvill.png' },
-    { name: 'Ioni Bowcher', image: 'ionibowcher.png' },
-    { name: 'Ivan Magalhaes', image: 'ivanmagalhaes.png' },
-    { name: 'Onyama Limba', image: 'onyamalimba.png' },
-    { name: 'Stephen Shaw', image: 'stephenshaw.png' },
-    { name: 'XuXue Feng', image: 'xuxuefeng.png' }
-]);
-const statuses = ref(['unqualified', 'qualified', 'new', 'negotiation', 'renewal', 'proposal']);
-const loading = ref(true);
-
-onMounted(() => {
-    CustomerService.getCustomersMedium().then((data) => {
-        customers.value = getCustomers(data);
-        loading.value = false;
-    });
+defineProps({
+    teamPricing: Object,
+    allowUpload: Boolean,
 });
 
+function formatNumber(number, min = 2, max = 2){
+    return number.toLocaleString(undefined, {
+        minimumFractionDigits: min,
+        maximumFractionDigits: max}
+    )
+}
+
+const filters = ref();
+
+const dt = ref();
+
+const exportCSV = () => {
+    dt.value.exportCSV();
+};
 
 const initFilters = () => {
     filters.value = {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        name: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        'country.name': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        representative: { value: null, matchMode: FilterMatchMode.IN },
-        date: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }] },
-        balance: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
-        status: { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
-        activity: { value: [0, 100], matchMode: FilterMatchMode.BETWEEN },
-        verified: { value: null, matchMode: FilterMatchMode.EQUALS }
+        part_type: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+        manufacturer: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+        model_number: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+        list_price: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+        multiplier: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+        static_price: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
     };
 };
 
 initFilters();
 
-const formatDate = (value) => {
-    return value.toLocaleDateString('en-US', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    });
-};
-const formatCurrency = (value) => {
-    return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-};
 const clearFilter = () => {
     initFilters();
-};
-const getCustomers = (data) => {
-    return [...(data || [])].map((d) => {
-        d.date = new Date(d.date);
-
-        return d;
-    });
-};
-const getSeverity = (status) => {
-    switch (status) {
-        case 'unqualified':
-            return 'danger';
-
-        case 'qualified':
-            return 'success';
-
-        case 'new':
-            return 'info';
-
-        case 'negotiation':
-            return 'warn';
-
-        case 'renewal':
-            return null;
-    }
 };
 </script>

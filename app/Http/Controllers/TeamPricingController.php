@@ -18,8 +18,10 @@ class TeamPricingController extends Controller
         if($user->user_type === 2){
             $teamPricing->where('team_id', $user->team_id);
         }
-        $paginated = $teamPricing->paginate(10);
-        return Inertia::render('TeamPricing/IndexPage', ['teamPricing' => $paginated]);
+        $paginated = $teamPricing->get();
+        $allowUpload = $user->user_type == 2 || $user->user_type == 1;
+
+        return Inertia::render('TeamPricing/IndexPage', ['teamPricing' => $paginated, 'allowUpload' => $allowUpload]);
     }
 
     public function upload(){
@@ -63,6 +65,7 @@ class TeamPricingController extends Controller
                 $list_price = $pricing[3];
                 $multiplier = $pricing[4] ? $pricing[4] : 0;
                 $static_price = $pricing[5] ? $pricing[5] : 0;
+                $team_price = $multiplier ? $multiplier * $list_price : $static_price;
                 $team_id = Auth::user()->team_id;
 
                 $data = [
@@ -72,7 +75,8 @@ class TeamPricingController extends Controller
                     'model_number' => $model_number,
                     'list_price' => $list_price,
                     'multiplier' => $multiplier,
-                    'static_price' => $static_price
+                    'static_price' => $static_price,
+                    'team_price' => $team_price,
                 ];
 
                 $exist = TeamPricingModel::where('manufacturer', $manufacturer)

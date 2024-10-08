@@ -18,6 +18,7 @@ class TeamPricingModel extends Model
         'list_price',
         'multiplier',
         'static_price',
+        'team_price',
         'is_active'
     ];
 

@@ -35,3 +35,14 @@ php artisan serve
 ### Open another terminal and run
 ```bash  
 npm run dev
+```
+
+### Default users note: passwords are the same 'password'
+- System Admin
+  - email: system.admin@email.com
+- Team Admins
+  - email: teama.admin@email.com
+  - email: teamb.admin@email.com
+- Team Members
+  - email: teama.member@email.com
+  - email: teamb.member@email.com

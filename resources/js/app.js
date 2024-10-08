@@ -15,7 +15,7 @@ import ToastService from 'primevue/toastservice';
 import axiosPlugin from './Plugins/axios'; // Your custom axios plugin
 import AppState from './Plugins/appState.js'; // Your custom app state plugin
 import ThemeSwitcher from './Components/ThemeSwitcher.vue'; // Your ThemeSwitcher component
-import Noir from './presets/Noir.js'; // PrimeVue custom theme preset
+import Noir from './Presets/Noir.js'; // PrimeVue custom theme preset
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 
