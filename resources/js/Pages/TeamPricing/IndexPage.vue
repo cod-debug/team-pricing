@@ -6,6 +6,7 @@ import { Head } from '@inertiajs/vue3';
 import 'primevue/resources/themes/aura-light-blue/theme.css';
 import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';   
+import { Link } from '@inertiajs/vue3';
 
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -17,7 +18,7 @@ defineProps({
 </script>
 
 <template>
-    <Head title="Dashboard" />
+    <Head title="Team Pricing" />
 
     <AuthenticatedLayout>
         <template #header>
@@ -31,7 +32,7 @@ defineProps({
                         <div class="p-6 text-gray-900 font-bold text-lg">List of team pricing</div>
                         <div class="p-6 flex gap-2">
                             <SecondaryButton>Download</SecondaryButton>
-                            <PrimaryButton>Upload</PrimaryButton>
+                            <Link :href="route('team_pricing_upload')"><PrimaryButton>Upload</PrimaryButton></Link>
                         </div>
                     </div>
                     <div class="p-4">

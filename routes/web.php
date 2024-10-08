@@ -27,8 +27,9 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/team-pricing', [TeamPricingController::class, 'index'])
-->middleware(['auth', 'verified'])
-->name('team_pricing');
+Route::middleware(['auth', 'verified'])->prefix('team-pricing')->group(function(){
+    Route::get('', [TeamPricingController::class, 'index'])->name('team_pricing');
+    Route::get('upload', [TeamPricingController::class, 'upload'])->name('team_pricing_upload');
+});
 
 require __DIR__.'/auth.php';

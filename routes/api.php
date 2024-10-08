@@ -20,5 +20,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::middleware(['auth', 'team_admin'])->group(function () {
-    Route::post('login', [TeamPricingController::class, 'get'])->name('get_team_pricing');
+    Route::post('team-pricing', [TeamPricingController::class, 'get'])->name('get_team_pricing');
+    Route::post('team-pricing/upload', [TeamPricingController::class, 'uploadPost'])->name('upload_team_pricing');
 });
