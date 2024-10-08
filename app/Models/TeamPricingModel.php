@@ -8,14 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class TeamPricingModel extends Model
 {
     use HasFactory;
-    protected $table = "team_pricing";
+    protected $table = "team_pricings";
 
     protected $fillable = [
         'team_id',
-        'part_type',
-        'manufacturer',
-        'model_number',
-        'list_price',
+        'system_part_id',
         'multiplier',
         'static_price',
         'team_price',
@@ -23,6 +20,10 @@ class TeamPricingModel extends Model
     ];
 
     public function team(){
-        $this->belongsTo(TeamModel::class, 'team_id');
+        return $this->belongsTo(TeamModel::class, 'team_id');
+    }
+
+    public function part(){
+        return $this->belongsTo(SystemWidePartModel::class, 'team_id');
     }
 }

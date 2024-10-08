@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\TeamModel;
 use App\Models\TeamPricingModel;
 use Illuminate\Support\Facades\Auth;
+use App\Models\SystemWidePartModel;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -14,14 +16,21 @@ class TeamPricingController extends Controller
     public function index(){
         $user = Auth::user();
 
-        $teamPricing = TeamPricingModel::where('is_active', true);
-        if($user->user_type === 2){
-            $teamPricing->where('team_id', $user->team_id);
-        }
-        $paginated = $teamPricing->get();
+        $teamPricing = SystemWidePartModel::where('is_active', true)->get();
+
         $allowUpload = $user->user_type == 2 || $user->user_type == 1;
 
-        return Inertia::render('TeamPricing/IndexPage', ['teamPricing' => $paginated, 'allowUpload' => $allowUpload]);
+        $data = [
+            'teamPricing' => $teamPricing, 
+            'allowUpload' => $allowUpload,
+            'isAdmin' => $user->user_type == 1
+        ];
+
+        if($user->user_type == 1){
+            $data['teams'] = TeamModel::all();
+        }
+
+        return Inertia::render('TeamPricing/IndexPage', $data);
     }
 
     public function upload(){
@@ -43,7 +52,16 @@ class TeamPricingController extends Controller
         }
     
         try {
-            $inputFileType = 'Xlsx';
+            // Determine the file type based on the file extension
+            $extension = $file->getClientOriginalExtension();
+    
+            if ($extension == 'xlsx') {
+                $inputFileType = 'Xlsx';
+            } elseif ($extension == 'csv') {
+                $inputFileType = 'Csv';
+            } else {
+                return response()->json(['error' => 'Unsupported file type'], 400);
+            }
             
             // Create a reader and load the file
             $reader = IOFactory::createReader($inputFileType);
@@ -53,35 +71,30 @@ class TeamPricingController extends Controller
             $dataArray = $spreadsheet->getActiveSheet()->toArray();
     
             // Remove the first row (headers) if it exists
-            $dataWithoutHeader = array_slice($dataArray, 1);
+            $parts = array_slice($dataArray, 1);
             $added = [];
             $updated = [];
             $error_import = [];
 
-            foreach($dataWithoutHeader as $pricing){
-                $part_type = $pricing[0];
-                $manufacturer = $pricing[1];
-                $model_number = $pricing[2];
-                $list_price = $pricing[3];
-                $multiplier = $pricing[4] ? $pricing[4] : 0;
-                $static_price = $pricing[5] ? $pricing[5] : 0;
-                $team_price = $multiplier ? $multiplier * $list_price : $static_price;
-                $team_id = Auth::user()->team_id;
+            set_time_limit(600);
+
+            foreach($parts as $part){
+                $is_active = $part[0] == 'Y';
+                $part_type = $part[1];
+                $manufacturer = $part[2];
+                $model_number = $part[3];
+                $list_price = $part[4] ? $part[4] : 0;
 
                 $data = [
-                    'team_id' => $team_id,
                     'part_type' => $part_type,
                     'manufacturer' => $manufacturer, 
                     'model_number' => $model_number,
                     'list_price' => $list_price,
-                    'multiplier' => $multiplier,
-                    'static_price' => $static_price,
-                    'team_price' => $team_price,
+                    'is_active' => $is_active
                 ];
 
-                $exist = TeamPricingModel::where('manufacturer', $manufacturer)
+                $exist = SystemWidePartModel::where('manufacturer', $manufacturer)
                 ->where('model_number', $model_number)
-                ->where('team_id', $team_id)
                 ->first();
 
                 if($exist){
@@ -90,7 +103,7 @@ class TeamPricingController extends Controller
                     array_push($updated, $data);
                 } else {
                     // add
-                    TeamPricingModel::create($data);
+                    SystemWidePartModel::create($data);
                     array_push($added, $data);
                 }
 
@@ -113,4 +126,5 @@ class TeamPricingController extends Controller
         }
 
     }
+    
 }

@@ -12,7 +12,7 @@
                     <form @submit.prevent="submit()" class="rounded p-8 flex flex-col gap-3 max-w-full lg:w-1/2">
                         <div>
                             <InputLabel value="Excel File" />
-                            <input type="file" accept=".xlsx" class="border p-2 rounded w-full" required ref="excelFile" :disabled="loading" />
+                            <input type="file" accept=".xlsx, .csv" class="border p-2 rounded w-full" required ref="excelFile" :disabled="loading" />
                         </div>
                         <div class="text-right">
                             <PrimaryButton type="submit" :disabled="loading">Upload</PrimaryButton>
@@ -40,7 +40,7 @@
                                 </Column>
                                 <Column header="Team Price">
                                     <template #body="slotProps">
-                                        <div class="text-right">{{ formatNumber(slotProps.data.multiplier ? slotProps.data.multiplier * slotProps.data.list_price : slotProps.data.static_price)}}</div>
+                                        <div class="text-right">{{ formatNumber(slotProps.data.team_price)}}</div>
                                     </template>
                                 </Column>
                             </DataTable>
@@ -86,6 +86,8 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 export default {
+    props: {
+    },
     data(){
         return {
             loading: false,
@@ -96,6 +98,7 @@ export default {
             status: null,
             show_result: false,
             submitted: false,
+            team: null,
         }
     },
     methods: {
@@ -103,6 +106,10 @@ export default {
             let file = this.$refs.excelFile;
             let payload = new FormData();
             payload.append('file', file.files[0]);
+
+            if(this.isAdmin){
+                payload.append('team_id', this.team);
+            }
 
             this.loading = true;
             this.show_result = false;

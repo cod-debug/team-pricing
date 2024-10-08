@@ -33,7 +33,7 @@ const showingNavigationDropdown = ref(false);
                                     Dashboard
                                 </NavLink>
                                 <NavLink :href="route('team_pricing')" :active="route().current('team_pricing')">
-                                    Team Pricing
+                                    System-wide parts
                                 </NavLink>
                             </div>
                         </div>

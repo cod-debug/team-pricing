@@ -13,14 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('team_pricing', function (Blueprint $table) {
+        Schema::create('team_pricings', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('team_id');
             $table->foreign('team_id')->references('id')->on('teams');
-            $table->string('part_type');
-            $table->string('manufacturer');
-            $table->string('model_number');
-            $table->double('list_price')->default(0.00);
+            $table->unsignedBigInteger('system_part_id');
+            $table->foreign('system_part_id')->references('id')->on('system_wide_parts');
             $table->double('multiplier')->nullable();
             $table->double('static_price')->nullable();
             $table->double('team_price')->default(0.00);
@@ -36,6 +34,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('team_pricing');
+        Schema::dropIfExists('team_pricings');
     }
 };

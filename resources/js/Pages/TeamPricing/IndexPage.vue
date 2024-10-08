@@ -9,13 +9,14 @@
 
         <div class="py-12">
             <div class="max-w-8xl mx-auto sm:px-6 lg:px-8">
+                
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="flex justify-between items-center">
                         <div class="p-6 text-gray-900 font-bold text-lg">List of system-wide parts</div>
                         <div class="p-6 flex gap-2" v-if="allowUpload">
                             <SecondaryButton @click="exportCSV($event)">
                                 <i class="pi pi-download"></i>
-                                <span class="ml-2">Download</span>
+                                <span class="ml-2">Download CSV</span>
                             </SecondaryButton>
                             <Link :href="route('team_pricing_upload')">
                                 <PrimaryButton>
@@ -23,6 +24,17 @@
                                     <span class="ml-2">Upload</span>
                                 </PrimaryButton>
                             </Link>
+                        </div>
+                    </div>
+                    <div class="p-4" v-if="isAdmin">
+                        <div class="gap-2 flex flex-row items-center">
+                            <label>Team</label>
+                            <select v-model="team" class="rounded text-sm">
+                                <option value="">All</option>
+                                <option v-for="(item, key) in teams" :key="key" :value="item.id">
+                                    {{ item.name }}
+                                </option>
+                            </select>
                         </div>
                     </div>
                     <DataTable v-model:filters="filters" 
@@ -33,7 +45,7 @@
                             dataKey="id"
                             ref="dt"
                             filterDisplay="menu" 
-                            :globalFilterFields="['part_type', 'manufacturer', 'model_number', 'list_price', 'multipler', 'static_price', 'team_price']"
+                            :globalFilterFields="['part_type', 'manufacturer', 'model_number', 'list_price', 'multiplier', 'static_price', 'team_price']"
                     >
                         <template #header>
                             <div class="flex justify-between">
@@ -82,30 +94,6 @@
                                 <input v-model="filterModel.value" type="text" placeholder="Search by list price" />
                             </template>
                         </Column>
-                        <Column field="multiplier" header="Multiplier" style="min-width: 12rem">
-                            <template #body="{ data }">
-                                <div class="text-right">{{ data.multiplier ? data.multiplier : '' }}</div>
-                            </template>
-                            <template #filter="{ filterModel }">
-                                <input v-model="filterModel.value" type="text" placeholder="Search by list multiplier" />
-                            </template>
-                        </Column>
-                        <Column field="static_price" header="Static Price" style="min-width: 12rem">
-                            <template #body="{ data }">
-                                <div class="text-right">{{ data.static_price > 0 ? data.static_price : ''  }}</div>
-                            </template>
-                            <template #filter="{ filterModel }">
-                                <input v-model="filterModel.value" type="text" placeholder="Search by list static price" />
-                            </template>
-                        </Column>
-                        <Column field="team_price" header="Team Price" style="min-width: 12rem">
-                            <template #body="{ data }">
-                                <div class="text-right">{{ data.team_price > 0 ? formatNumber(data.team_price, 2, 10) : ''  }}</div>
-                            </template>
-                            <template #filter="{ filterModel }">
-                                <input v-model="filterModel.value" type="text" placeholder="Search by list static price" />
-                            </template>
-                        </Column>
                     </DataTable>
                 </div>
             </div>
@@ -127,18 +115,19 @@ import { Head } from '@inertiajs/vue3';
 defineProps({
     teamPricing: Object,
     allowUpload: Boolean,
+    isAdmin: Boolean,
+    teams: Array,
 });
-
-function formatNumber(number, min = 2, max = 2){
+const formatNumber = (number, decimals = 2, max = 10) => {
     return number.toLocaleString(undefined, {
-        minimumFractionDigits: min,
+        minimumFractionDigits: decimals,
         maximumFractionDigits: max}
     )
-}
-
+};
 const filters = ref();
 
 const dt = ref();
+const team = ref(null);
 
 const exportCSV = () => {
     dt.value.exportCSV();
@@ -153,6 +142,7 @@ const initFilters = () => {
         list_price: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
         multiplier: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
         static_price: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+        team_id: { value: team, matchMode: 'equals' }
     };
 };
 
