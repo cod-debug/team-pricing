@@ -21,8 +21,9 @@ return new class extends Migration
             $table->string('manufacturer');
             $table->string('model_number');
             $table->double('list_price')->default(0.00);
-            $table->double('multiplier')->default(0.00);
-            $table->double('static_price')->default(0.00);
+            $table->double('multiplier')->nullable();
+            $table->double('static_price')->nullable();
+            $table->double('team_price')->default(0.00);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
