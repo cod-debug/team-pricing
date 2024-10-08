@@ -3,6 +3,11 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import { Head } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import 'primevue/resources/themes/aura-dark-blue/theme.css';
+import 'primevue/resources/primevue.min.css';
+import 'primeicons/primeicons.css';   
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
 export default {
     data(){
         return {
@@ -41,6 +46,12 @@ export default {
             }
             
             this.loading = false;
+        },
+        formatNumber(number, decimals = 2){
+            return number.toLocaleString(undefined, {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals}
+            )
         }
     },
     components: {
@@ -48,6 +59,8 @@ export default {
         InputLabel,
         Head,
         PrimaryButton,
+        DataTable,
+        Column
     }
 }
 </script>
@@ -78,84 +91,52 @@ export default {
                     <div v-if="submitted">
                         <span class="text-lg font-bold text-gray-700">Added Pricing <span class="bg-gray-700 text-white px-1 ml-2 rounded">{{ added.length }}</span></span>
                         <div class="relative max-h-[400px]">
-                            <table class="w-full">
-                                <thead class="bg-gray-800  text-white border">
-                                    <th class="py-2">Part Type</th>
-                                    <th class="py-2">Manufacturer</th>
-                                    <th class="py-2">Model Number</th>
-                                    <th class="py-2">List Price</th>
-                                    <th class="py-2">Multiplier</th>
-                                    <th class="py-2">Static Price</th>
-                                </thead>
-                                <tbody class="border" v-if="added.length > 0">
-                                    <tr v-for="(item, key) in added" :key="key">
-                                        <td>
-                                            <p class="p-2">{{ item.part_type }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="p-2">{{ item.manufacturer }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="p-2">{{ item.model_number }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="p-2 text-right">{{ item.list_price }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="p-2 text-right">{{ item.multiplier || '' }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="p-2 text-right">{{ item.static_price || '' }}</p>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                                <tbody class="border" v-else>
-                                    <td colspan="5" class="p-2">
-                                        <p class="text-gray-400">No added pricing</p>
-                                    </td>
-                                </tbody>
-                            </table>
+                            <DataTable :value="added" tableStyle="min-width: 50rem" v-if="added.length > 0">
+                                <Column field="part_type" header="Part Type"></Column>
+                                <Column field="manufacturer" header="Manufacturer"></Column>
+                                <Column field="model_number" header="Model Number"></Column>
+                                <Column field="list_price" header="List Price" class="text-right"></Column>
+                                <Column header="Multiplier">
+                                    <template #body="slotProps">
+                                        <p class="text-right">{{ slotProps.data.multiplier || '' }}</p>
+                                    </template></Column>
+                                <Column header="Static Price">
+                                    <template #body="slotProps">
+                                        <p class="text-right">{{ slotProps.data.static_price || '' }}</p>
+                                    </template>
+                                </Column>
+                                <Column header="Team Price">
+                                    <template #body="slotProps">
+                                        <div class="text-right">{{ formatNumber(slotProps.data.multiplier ? slotProps.data.multiplier * slotProps.data.list_price : slotProps.data.static_price)}}</div>
+                                    </template>
+                                </Column>
+                            </DataTable>
+                            <p class="text-yellow-600 bg-yellow-200 p-1 rounded px-3" v-else>No pricing added.</p>
                         </div>
-                        
-                        <div class="text-lg font-bold text-gray-700 mt-8">Pricing that already exist<span class="bg-gray-700 text-white px-1 ml-2 rounded">{{ updated.length }}</span></div>
-                        <div class="relative max-h-[400px]">
-                            <table class="w-full">
-                                <thead class="bg-gray-800  text-white border">
-                                    <th class="py-2">Part Type</th>
-                                    <th class="py-2">Manufacturer</th>
-                                    <th class="py-2">Model Number</th>
-                                    <th class="py-2">List Price</th>
-                                    <th class="py-2">Multiplier</th>
-                                    <th class="py-2">Static Price</th>
-                                </thead>
-                                <tbody class="border" v-if="updated.length > 0">
-                                    <tr v-for="(item, key) in updated" :key="key">
-                                        <td>
-                                            <p class="p-2">{{ item.part_type }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="p-2">{{ item.manufacturer }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="p-2">{{ item.model_number }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="p-2 text-right">{{ item.list_price }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="p-2 text-right">{{ item.multiplier || '' }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="p-2 text-right">{{ item.static_price || '' }}</p>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                                <tbody class="border" v-else>
-                                    <td colspan="5" class="p-2">
-                                        <p class="text-gray-400">No added pricing</p>
-                                    </td>
-                                </tbody>
-                            </table>
+                        <div class="border-b border-gray-300 w-full my-8"></div>
+                        <div class="text-lg font-bold text-gray-700">Pricing that already exist<span class="bg-gray-700 text-white px-1 ml-2 rounded">{{ updated.length }}</span></div>
+                        <div class="relative max-h-[300px] overflow-auto">
+                            <DataTable :value="updated" tableStyle="min-width: 50rem" v-if="updated.length > 0">
+                                <Column field="part_type" header="Part Type"></Column>
+                                <Column field="manufacturer" header="Manufacturer"></Column>
+                                <Column field="model_number" header="Model Number"></Column>
+                                <Column field="list_price" header="List Price" class="text-right"></Column>
+                                <Column header="Multiplier">
+                                    <template #body="slotProps">
+                                        <p class="text-right">{{ slotProps.data.multiplier || '' }}</p>
+                                    </template></Column>
+                                <Column header="Static Price">
+                                    <template #body="slotProps">
+                                        <p class="text-right">{{ slotProps.data.static_price || '' }}</p>
+                                    </template>
+                                </Column>
+                                <Column header="Team Price">
+                                    <template #body="slotProps">
+                                        <div class="text-right">{{ formatNumber(slotProps.data.multiplier ? slotProps.data.multiplier * slotProps.data.list_price : slotProps.data.static_price)}}</div>
+                                    </template>
+                                </Column>
+                            </DataTable>
+                            <p class="text-yellow-600 bg-yellow-200 p-1 rounded px-3" v-else>No pricing updated.</p>
                         </div>
                     </div>
                 </div>
