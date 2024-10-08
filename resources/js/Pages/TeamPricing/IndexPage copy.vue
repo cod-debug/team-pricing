@@ -5,14 +5,12 @@
                 filterDisplay="menu" :loading="loading" :globalFilterFields="['name', 'country.name', 'representative.name', 'balance', 'status']">
             <template #header>
                 <div class="flex justify-between">
-                    <button type="button" label="Clear" outlined @click="clearFilter()">
-                        <i class="pi pi-filter-slash"></i> Clear Search
-                    </button>
+                    <Button type="button" icon="pi pi-filter-slash" label="Clear" outlined @click="clearFilter()" />
                     <IconField>
                         <InputIcon>
                             <i class="pi pi-search" />
                         </InputIcon>
-                        <input v-model="filters['global'].value" placeholder="Keyword Search" />
+                        <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
                     </IconField>
                 </div>
             </template>
@@ -23,7 +21,7 @@
                     {{ data.name }}
                 </template>
                 <template #filter="{ filterModel }">
-                    <input v-model="filterModel.value" type="text" placeholder="Search by name" />
+                    <InputText v-model="filterModel.value" type="text" placeholder="Search by name" />
                 </template>
             </Column>
             <Column header="Country" filterField="country.name" style="min-width: 12rem">
@@ -34,13 +32,13 @@
                     </div>
                 </template>
                 <template #filter="{ filterModel }">
-                    <input v-model="filterModel.value" type="text" placeholder="Search by country" />
+                    <InputText v-model="filterModel.value" type="text" placeholder="Search by country" />
                 </template>
                 <template #filterclear="{ filterCallback }">
-                    <button type="button" icon="pi pi-times" @click="filterCallback()" severity="secondary"></button>
+                    <Button type="button" icon="pi pi-times" @click="filterCallback()" severity="secondary"></Button>
                 </template>
                 <template #filterapply="{ filterCallback }">
-                    <button type="button" icon="pi pi-check" @click="filterCallback()" severity="success"></button>
+                    <Button type="button" icon="pi pi-check" @click="filterCallback()" severity="success"></Button>
                 </template>
                 <template #filterfooter>
                     <div class="px-4 pt-0 pb-4 text-center">Customized Buttons</div>
@@ -121,9 +119,6 @@
 import { ref, onMounted } from 'vue';
 import { CustomerService } from '@/Service/CustomerService.js';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
-import Checkbox from '@/Components/Checkbox.vue';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
 
 const customers = ref();
 const filters = ref();
