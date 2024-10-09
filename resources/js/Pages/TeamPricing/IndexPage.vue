@@ -86,7 +86,7 @@
                                 <input v-model="filterModel.value" type="text" placeholder="Search by model number" />
                             </template>
                         </Column>
-                        <Column field="list_price" header="List Price" style="min-width: 12rem">
+                        <Column field="part.list_price" header="List Price" style="min-width: 12rem">
                             <template #body="{ data }">
                                 <div class="text-right">{{ data.part.list_price ? formatNumber(data.part.list_price, 2) : '' }}</div>
                             </template>
@@ -163,7 +163,7 @@ const initFilters = () => {
         'part.part_type': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
         'part.manufacturer': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
         'part.model_number': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        list_price: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+        'part.list_price': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
         multiplier: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
         static_price: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
         team_id: { value: team, matchMode: 'equals' }
