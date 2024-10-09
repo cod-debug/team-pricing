@@ -2,41 +2,40 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\TeamModel;
 use App\Models\TeamPricingModel;
 use Illuminate\Support\Facades\Auth;
 use App\Models\SystemWidePartModel;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-class TeamPricingController extends Controller
+class SystemWidePartsController extends Controller
 {
     //
     public function index(){
         $user = Auth::user();
 
-        $teamPricing = TeamPricingModel::where('is_active', true)
-        ->where('team_id', $user->team_id)
-        ->with('part')->get();
+        $teamPricing = SystemWidePartModel::where('is_active', true)->get();
 
-        $allowUpload = $user->user_type == 2;
+        $allowUpload = $user->user_type == 1;
 
         $data = [
             'teamPricing' => $teamPricing, 
             'allowUpload' => $allowUpload,
-            'isAdmin' => $user->user_type == 1
+            'isSystemAdmin' => $user->user_type == 1,
+            'isTeamAdmin' => $user->user_type == 2,
         ];
 
         if($user->user_type == 1){
             $data['teams'] = TeamModel::all();
         }
 
-        return Inertia::render('TeamPricing/IndexPage', $data);
+        return Inertia::render('SystemWideParts/IndexPage', $data);
     }
 
     public function upload(){
-        return Inertia::render('TeamPricing/UploadPage');
+        return Inertia::render('SystemWideParts/UploadPage');
     }
 
     public function uploadPost(Request $request){
@@ -81,53 +80,34 @@ class TeamPricingController extends Controller
             set_time_limit(800);
 
             foreach($parts as $part){
-                $part_type = $part[0];
-                $manufacturer = $part[1];
-                $model_number = $part[2];
-                $list_price = $part[3] ? $part[3] : 0;
-                $multiplier = $part[4];
-                $static_price = $part[5];
-                $team_price = $multiplier ? $multiplier * $list_price : $static_price;
-                $team_id = Auth::user()->team_id;
+                $is_active = $part[0] == 'Y';
+                $part_type = $part[1];
+                $manufacturer = $part[2];
+                $model_number = $part[3];
+                $list_price = $part[4] ? $part[4] : 0;
 
-                $system_wide_parts_data = [
+                $data = [
                     'part_type' => $part_type,
                     'manufacturer' => $manufacturer, 
                     'model_number' => $model_number,
-                    'list_price' => $list_price
+                    'list_price' => $list_price,
+                    'is_active' => $is_active
                 ];
 
-                $system_wide_part = SystemWidePartModel::where('manufacturer', $manufacturer)
+                $exist = SystemWidePartModel::where('manufacturer', $manufacturer)
                 ->where('model_number', $model_number)
                 ->first();
 
-                if($system_wide_part){
+                if($exist){
                     // update
-                    $system_wide_part->update($system_wide_parts_data);
+                    $exist->update($data);
+                    array_push($updated, $data);
                 } else {
                     // add
-                    $system_wide_part = SystemWidePartModel::create($system_wide_parts_data);
+                    SystemWidePartModel::create($data);
+                    array_push($added, $data);
                 }
 
-                $system_part_id = $system_wide_part->id;
-                $team_pricing = TeamPricingModel::where('team_id', $team_id)->where('system_part_id', $system_part_id)->first();
-
-                $team_pricing_data = [
-                    'team_id' => $team_id,
-                    'system_part_id' => $system_part_id,
-                    'multiplier' => $multiplier,
-                    'static_price' => $static_price,
-                    'team_price' => $team_price,
-                ];
-
-                if($team_pricing){
-                    // if team price already exists
-                    $team_pricing->update($team_pricing_data);
-                    array_push($updated, $system_wide_parts_data);
-                } else {
-                    TeamPricingModel::create($team_pricing_data);
-                    array_push($added, $system_wide_parts_data);
-                }
             }
 
             $res = [
@@ -135,6 +115,7 @@ class TeamPricingController extends Controller
                 'added' => $added,
                 'error_import' => $error_import,
                 'updated' => $updated,
+                
             ];
 
             // Return JSON response with the data (excluding the first row)
@@ -146,5 +127,4 @@ class TeamPricingController extends Controller
         }
 
     }
-    
 }

@@ -24,6 +24,6 @@ class TeamPricingModel extends Model
     }
 
     public function part(){
-        return $this->belongsTo(SystemWidePartModel::class, 'team_id');
+        return $this->belongsTo(SystemWidePartModel::class, 'system_part_id');
     }
 }

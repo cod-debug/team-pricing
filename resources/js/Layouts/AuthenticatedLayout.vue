@@ -5,9 +5,59 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
+const page = usePage();
+
+const links = ref([]);
+// SYSTEM ADMIN LINKS
+
+if(page.props.auth.user.user_type == 1){
+    links.value = [
+        {
+            name: 'Dashboard',
+            route: 'dashboard'
+        },
+        {
+            name: 'System-wide parts',
+            route: 'system_wide_parts'
+        }
+    ];
+}
+
+// TEAM ADMIN LINKS 
+if(page.props.auth.user.user_type == 2){
+    links.value = [
+        {
+            name: 'Dashboard',
+            route: 'dashboard'
+        },
+        {
+            name: 'System-wide parts',
+            route: 'system_wide_parts'
+        },
+        {
+            name: 'Team pricing',
+            route: 'team_pricing'
+        }
+    ];
+}
+
+if(page.props.auth.user.user_type == 3){
+    links.value = [
+        {
+            name: 'Dashboard',
+            route: 'dashboard'
+        },
+        {
+            name: 'Team pricing',
+            route: 'team_pricing'
+        }
+    ];
+}
+
+
 </script>
 
 <template>
@@ -29,12 +79,14 @@ const showingNavigationDropdown = ref(false);
 
                             <!-- Navigation Links -->
                             <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                                    Dashboard
+                                <NavLink :href="route(link.route)" 
+                                :active="route().current(link.route)" 
+                                v-for="(link, key) in links" :key="key">
+                                    {{ link.name }}
                                 </NavLink>
-                                <NavLink :href="route('team_pricing')" :active="route().current('team_pricing')">
+                                <!-- <NavLink :href="route('system_wide_parts')" :active="route().current('system_wide_parts') || route().current('system_wide_parts_upload')">
                                     System-wide parts
-                                </NavLink>
+                                </NavLink> -->
                             </div>
                         </div>
 
@@ -114,11 +166,10 @@ const showingNavigationDropdown = ref(false);
                     class="sm:hidden"
                 >
                     <div class="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                            Dashboard
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('team_pricing')" :active="route().current('team_pricing')">
-                            Team Pricing
+                        <ResponsiveNavLink :href="route(link.route)" 
+                        :active="route().current(link.route)" 
+                        v-for="(link, key) in links" :key="key">
+                            {{ link.name }}
                         </ResponsiveNavLink>
                     </div>
 

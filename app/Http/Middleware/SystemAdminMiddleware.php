@@ -2,12 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use App\Providers\RouteServiceProvider;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
-class TeamAdminMiddleware
+class SystemAdminMiddleware
 {
     /**
      * Handle an incoming request.
@@ -18,7 +16,7 @@ class TeamAdminMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        if(!Auth::user()->user_type == 2){
+        if(!Auth::user()->user_type == 1){
             return redirect(RouteServiceProvider::HOME);
         } 
 
