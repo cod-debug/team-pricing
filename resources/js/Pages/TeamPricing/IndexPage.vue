@@ -4,7 +4,7 @@
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">System-wide parts</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Team pricing</h2>
         </template>
 
         <div class="py-12">
@@ -12,7 +12,7 @@
                 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="flex justify-between items-center">
-                        <div class="p-6 text-gray-900 font-bold text-lg">List of system-wide parts</div>
+                        <div class="p-6 text-gray-900 font-bold text-lg">List of team pricing</div>
                         <div class="p-6 flex gap-2" v-if="allowUpload">
                             <SecondaryButton @click="exportCSV($event)">
                                 <i class="pi pi-download"></i>
