@@ -102,7 +102,7 @@
                                 <input v-model="filterModel.value" type="text" placeholder="Search by list price" />
                             </template>
                         </Column>
-                        <Column field="static_price" header="Static Price" style="min-width: 12rem">
+                        <Column field="static_price" header="Static Price" style="min-width: 12rem" v-if="allowUpload">
                             <template #body="{ data }">
                                 <div class="text-right">{{ data.static_price ? formatNumber(data.static_price, 2) : '' }}</div>
                             </template>
