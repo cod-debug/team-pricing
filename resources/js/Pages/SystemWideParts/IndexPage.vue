@@ -13,12 +13,12 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="flex justify-between items-center">
                         <div class="p-6 text-gray-900 font-bold text-lg">List of system-wide parts</div>
-                        <div class="p-6 flex gap-2" v-if="isSystemAdmin">
+                        <div class="p-6 flex gap-2">
                             <SecondaryButton @click="exportCSV($event)">
                                 <i class="pi pi-download"></i>
                                 <span class="ml-2">Download CSV</span>
                             </SecondaryButton>
-                            <Link :href="route('system_wide_parts_upload')">
+                            <Link :href="route('system_wide_parts_upload')" v-if="isSystemAdmin">
                                 <PrimaryButton>
                                     <i class="pi pi-upload"></i>
                                     <span class="ml-2">System-wide parts upload</span>
